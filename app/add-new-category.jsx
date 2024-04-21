@@ -13,8 +13,10 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Foundation } from "@expo/vector-icons";
 import { supabase } from "../utils/SupabaseConfig";
 import { client } from "../utils/KindeConfig";
+import { useRouter } from "expo-router";
 
 export default function AddNewCategory() {
+  const router = useRouter();
   // State to store the selected icon, color, category name and total budget
   const [selectedIcon, setSelectedIcon] = useState("Ic");
   const [selectedColor, setSelectedColor] = useState(Colors.PRIMARY);
@@ -38,8 +40,11 @@ export default function AddNewCategory() {
         },
       ])
       .select();
-    console.log(data);
     if (data) {
+      router.replace({
+        params: { categoryId: data[0].id },
+        pathname: "/category-details",
+      });
       ToastAndroid.show("Category added successfully", ToastAndroid.SHORT);
     }
   };
