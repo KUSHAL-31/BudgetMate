@@ -42,7 +42,9 @@ export default function Header() {
       }}
     >
       <View>
-        <Image source={{ uri: user?.picture }} style={styles.userImage} />
+        {user?.picture && (
+          <Image source={{ uri: user?.picture }} style={styles.userImage} />
+        )}
       </View>
       <View
         style={{
