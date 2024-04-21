@@ -1,5 +1,12 @@
-import { View, Text, Button, StyleSheet } from "react-native";
-import React, { useEffect } from "react";
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import { Link, useRouter } from "expo-router";
 import services from "../../utils/services";
 import { client } from "../../utils/KindeConfig";
@@ -9,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../utils/Colors";
 import CircleChart from "../../components/CircleChart";
 import { Ionicons } from "@expo/vector-icons";
+import CategoryList from "../../components/CategoryList";
 
 export default function Home() {
   const router = useRouter();
@@ -22,16 +30,23 @@ export default function Home() {
     }
   };
 
+  const [categoryList, setCategoryList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   // This function is used to get the budget category
 
   const getBudgetCategory = async () => {
+    setLoading(true);
     const user = await client.getUserDetails();
     // Get the budget category by the user email
     const { data, error } = await supabase
       .from("BudgetCategory")
-      .select("*")
+      .select("*,BudgetCategoryItems(*)")
       .eq("created_by", user.email);
-    console.log(data);
+    if (data) {
+      setCategoryList(data);
+      setLoading(false);
+    }
   };
 
   // This useEffect hook is used to check if the user is authenticated when the component is mounted
@@ -44,7 +59,6 @@ export default function Home() {
 
   const checkAuthenticatedUser = async () => {
     const result = await services.getData("login");
-    console.log("result", result);
     if (result !== "true") {
       // If the user is not authenticated, redirect to the login page
       router.replace("/login");
@@ -53,10 +67,22 @@ export default function Home() {
 
   return (
     <View style={{ marginTop: 20, flex: 1 }}>
-      <View style={styles.container}>
-        <Header />
-        <CircleChart />
-      </View>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => getBudgetCategory()}
+          />
+        }
+      >
+        <View style={styles.container}>
+          <Header />
+        </View>
+        <View style={{ padding: 20, marginTop: -75 }}>
+          <CircleChart />
+          <CategoryList categoryList={categoryList} />
+        </View>
+      </ScrollView>
       <Link style={styles.addButton} href={"/add-new-category"}>
         <Ionicons name="add-circle" size={54} color={Colors.PRIMARY} />
       </Link>
