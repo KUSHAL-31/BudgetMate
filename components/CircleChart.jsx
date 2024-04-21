@@ -10,8 +10,8 @@ export default function CircleChart() {
   const [sliceColors, setSliceColors] = useState([Colors.grey]);
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 18 }}>
-        Total Estimate : <Text style={{ fontWeight: "bold" }}>Rs 0</Text>{" "}
+      <Text style={{ fontSize: 18, fontFamily: "outfit-regular" }}>
+        Total Estimate : <Text style={{ fontFamily: "outfit-bold" }}>Rs 0</Text>{" "}
       </Text>
       <View style={styles.rightSection}>
         <PieChart
@@ -27,7 +27,7 @@ export default function CircleChart() {
             size={24}
             color={Colors.grey}
           ></MaterialCommunityIcons>
-          <Text>NA</Text>
+          <Text style={{ fontFamily: "outfit-regular" }}>NA</Text>
         </View>
       </View>
     </View>

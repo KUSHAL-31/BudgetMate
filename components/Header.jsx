@@ -72,10 +72,11 @@ const styles = StyleSheet.create({
   greetingText: {
     color: Colors.white,
     fontSize: 16,
+    fontFamily: "outfit-regular",
   },
   userName: {
     color: Colors.white,
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: "outfit-bold",
   },
 });
