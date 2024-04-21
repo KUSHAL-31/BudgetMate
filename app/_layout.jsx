@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import React from "react";
+import React, { useCallback } from "react";
 import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
 
@@ -17,6 +17,14 @@ export default function HomeLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="add-new-category"
+        options={{
+          presentation: "modal",
+          headerShown: true,
+          title: "Add New Category",
+        }}
+      />
     </Stack>
   );
 }

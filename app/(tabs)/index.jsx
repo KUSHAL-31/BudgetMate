@@ -8,6 +8,7 @@ import Header from "../../components/Header";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../utils/Colors";
 import CircleChart from "../../components/CircleChart";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Home() {
   const router = useRouter();
@@ -51,21 +52,27 @@ export default function Home() {
   };
 
   return (
-    <SafeAreaView>
+    <View style={{ marginTop: 20, flex: 1 }}>
       <View style={styles.container}>
         <Header />
         <CircleChart />
       </View>
-    </SafeAreaView>
+      <Link style={styles.addButton} href={"/add-new-category"}>
+        <Ionicons name="add-circle" size={54} color={Colors.PRIMARY} />
+      </Link>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
     height: 150,
-    marginTop: 20,
     padding: 20,
     backgroundColor: Colors.PRIMARY,
+  },
+  addButton: {
+    position: "absolute",
+    right: 16,
+    bottom: 16,
   },
 });
