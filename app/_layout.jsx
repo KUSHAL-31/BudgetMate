@@ -10,7 +10,7 @@ export default function HomeLayout() {
     "outfit-bold": require("./../assets/fonts/Outfit-Bold.ttf"),
   });
 
-  return (
+  return fontsLoaded ? (
     <Stack
       screenOptions={{
         headerShown: false,
@@ -26,5 +26,7 @@ export default function HomeLayout() {
         }}
       />
     </Stack>
+  ) : (
+    <Text>Loading...</Text>
   );
 }
