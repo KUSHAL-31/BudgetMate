@@ -21,6 +21,7 @@ export default function CategoryItemList({ categoryDetails }) {
               </View>
               {categoryDetails?.BudgetCategoryItems.length - 1 !== index && (
                 <View
+                  key={index}
                   style={{
                     width: "100%",
                     borderWidth: 0.5,
@@ -55,8 +56,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   itemImage: {
-    width: 80,
-    height: 80,
+    width: 75,
+    height: 75,
     borderRadius: 15,
   },
   itemListContainer: {
@@ -65,6 +66,8 @@ const styles = StyleSheet.create({
   itemContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 10,
+    marginBottom: 10,
   },
   itemName: {
     fontFamily: "outfit-bold",
