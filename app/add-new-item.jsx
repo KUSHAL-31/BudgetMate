@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
 import Colors from "../utils/Colors";
@@ -30,6 +31,8 @@ export default function AddNewItem() {
     note: null,
   });
 
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
 
   // Get the category id from the URL
@@ -51,34 +54,40 @@ export default function AddNewItem() {
   };
 
   const handleAddItemClick = async () => {
-    const fileName = Date.now().toString();
-    // Add the code to add the item to the database here
-    const { data, error } = await supabase.storage
-      .from("images")
-      .upload(`${fileName}.png`, decode(image), {
-        contentType: "image/png",
-      });
-    if (data) {
-      const fileUrl = `${process.env.EXPO_PUBLIC_BUCKET_URL}${fileName}.png`;
-
-      const { data2, error2 } = await supabase
-        .from("BudgetCategoryItems")
-        .insert([
-          {
-            name: itemDetails.name,
-            cost: itemDetails.cost,
-            url: itemDetails.url,
-            note: itemDetails.note,
-            image: fileUrl,
-            budget_category_id: categoryId,
-          },
-        ]);
-      ToastAndroid.show("Item added successfully", ToastAndroid.SHORT);
-      router.replace({
-        params: { categoryId: categoryId },
-        pathname: "/category-details",
-      });
+    var isImageSelected = image !== defaultImage;
+    setLoading(true);
+    var fileUrl = defaultImage;
+    if (isImageSelected) {
+      const fileName = Date.now().toString();
+      // Add the code to add the item to the database here
+      const { data, error } = await supabase.storage
+        .from("images")
+        .upload(`${fileName}.png`, decode(image), {
+          contentType: "image/png",
+        });
+      if (data) {
+        fileUrl = `${process.env.EXPO_PUBLIC_BUCKET_URL}${fileName}.png`;
+      }
     }
+
+    const { data2, error2 } = await supabase
+      .from("BudgetCategoryItems")
+      .insert([
+        {
+          name: itemDetails.name,
+          cost: itemDetails.cost,
+          url: itemDetails.url,
+          note: itemDetails.note,
+          image: fileUrl,
+          budget_category_id: categoryId,
+        },
+      ]);
+    ToastAndroid.show("Item added successfully", ToastAndroid.SHORT);
+    setLoading(false);
+    router.replace({
+      params: { categoryId: categoryId },
+      pathname: "/category-details",
+    });
   };
 
   return (
@@ -132,18 +141,24 @@ export default function AddNewItem() {
         <TouchableOpacity
           activeOpacity={0.7}
           style={styles.addButton}
-          disabled={itemDetails.name === "" || itemDetails.cost === ""}
+          disabled={
+            itemDetails.name === "" || itemDetails.cost === "" || loading
+          }
           onPress={() => handleAddItemClick()}
         >
-          <Text
-            style={{
-              color: Colors.white,
-              fontSize: 16,
-              fontFamily: "outfit-medium",
-            }}
-          >
-            Add
-          </Text>
+          {loading ? (
+            <ActivityIndicator color={Colors.white} />
+          ) : (
+            <Text
+              style={{
+                color: Colors.white,
+                fontSize: 16,
+                fontFamily: "outfit-medium",
+              }}
+            >
+              Add
+            </Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
