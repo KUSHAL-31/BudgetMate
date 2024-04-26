@@ -20,7 +20,7 @@ export default function CategoryInfo({ categoryDetails }) {
 
   useEffect(() => {
     categoryDetails && calculateCategoryCost();
-  }, [categoryDetails]);
+  }, [categoryDetails.id]);
 
   // Function to calculate the total cost of the category
   const calculateCategoryCost = () => {
@@ -92,7 +92,7 @@ export default function CategoryInfo({ categoryDetails }) {
               // Redirect to the home page
               router.replace("/(tabs)");
             } catch (error) {
-              console.log(error);
+              ToastAndroid.show("Something went wrong.", ToastAndroid.SHORT);
             }
           },
         },

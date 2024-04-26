@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../utils/SupabaseConfig";
@@ -17,7 +17,7 @@ export default function CategoryDetails() {
 
   useEffect(() => {
     getCategoryDetails();
-  }, []);
+  }, [categoryDetails]);
 
   const getCategoryDetails = async () => {
     // Fetch the category details from the database
@@ -32,11 +32,16 @@ export default function CategoryDetails() {
 
   return (
     <View style={{ padding: 20, margin: 20, flex: 1 }}>
-      <TouchableOpacity onPress={() => router.back()}>
-        <Ionicons name="arrow-back-circle" size={40} color="black" />
-      </TouchableOpacity>
-      <CategoryInfo categoryDetails={categoryDetails} />
-      <CategoryItemList categoryDetails={categoryDetails} />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <TouchableOpacity onPress={() => router.replace("/(tabs)")}>
+          <Ionicons name="arrow-back-circle" size={40} color="black" />
+        </TouchableOpacity>
+        <CategoryInfo categoryDetails={categoryDetails} />
+        <CategoryItemList
+          categoryDetails={categoryDetails}
+          setUpdateRecord={() => getCategoryDetails()}
+        />
+      </ScrollView>
       <Link
         style={styles.addButton}
         href={{ pathname: "/add-new-item", params: { categoryId: categoryId } }}

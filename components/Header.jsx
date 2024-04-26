@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, ToastAndroid } from "react-native";
 import React, { useEffect, useState } from "react";
 import { client } from "../utils/KindeConfig";
 import Colors from "../utils/Colors";
@@ -59,7 +59,14 @@ export default function Header() {
           <Text style={styles.greetingText}>Good {getCurrentTime()}!</Text>
           <Text style={styles.userName}>{user?.given_name}</Text>
         </View>
-        <Ionicons name="notifications" size={24} color={Colors.white} />
+        <Ionicons
+          name="notifications"
+          size={24}
+          color={Colors.white}
+          onPress={() =>
+            ToastAndroid.show("Notifications coming soon!", ToastAndroid.SHORT)
+          }
+        />
       </View>
     </View>
   );
