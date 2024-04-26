@@ -1,11 +1,22 @@
-import { View, Text, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ToastAndroid,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../utils/Colors";
+import { supabase } from "../../utils/SupabaseConfig";
+import { useRouter } from "expo-router";
 
 export default function CategoryInfo({ categoryDetails }) {
   const [totalAmount, setTotalAmount] = useState(0);
   const [percentage, setPercentage] = useState(0);
+
+  const router = useRouter();
 
   useEffect(() => {
     categoryDetails && calculateCategoryCost();
@@ -24,6 +35,69 @@ export default function CategoryInfo({ categoryDetails }) {
       percentage = 100;
     }
     setPercentage(percentage);
+  };
+
+  // Function to delete the category
+  const deleteCategory = () => {
+    // Add the code to delete the category here
+    Alert.alert(
+      "Delete Category",
+      "Are you sure you want to delete this category?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            try {
+              // Code to delete the category
+              // Delete the images from the storage first
+              const { data, error } = await supabase
+                .from("BudgetCategoryItems")
+                .select("image")
+                .eq("budget_category_id", categoryDetails.id);
+              for (var item of data) {
+                if (item.image.includes("/public/images/")) {
+                  const imagePath = item.image.split("/public/images/")[1];
+                  const res = await supabase.storage
+                    .from("images")
+                    .remove([imagePath]);
+                }
+              }
+              if (error) {
+                ToastAndroid.show(
+                  "Something went wrong. Please try again later.",
+                  ToastAndroid.SHORT
+                );
+
+                // Redirect to the home page
+                router.replace("/(tabs)");
+              }
+              // Delete the items and the category
+              await supabase
+                .from("BudgetCategoryItems")
+                .delete()
+                .eq("budget_category_id", categoryDetails.id);
+              await supabase
+                .from("BudgetCategory")
+                .delete()
+                .eq("id", categoryDetails.id);
+              ToastAndroid.show(
+                "Category deleted successfully",
+                ToastAndroid.SHORT
+              );
+
+              // Redirect to the home page
+              router.replace("/(tabs)");
+            } catch (error) {
+              console.log(error);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -45,7 +119,9 @@ export default function CategoryInfo({ categoryDetails }) {
             {categoryDetails?.BudgetCategoryItems?.length} Items
           </Text>
         </View>
-        <Ionicons name="trash" size={24} color="red" />
+        <TouchableOpacity activeOpacity={0.6} onPress={() => deleteCategory()}>
+          <Ionicons name="trash" size={24} color="red" />
+        </TouchableOpacity>
       </View>
       {/* Progress Bar */}
       <View style={styles.progressContainer}>
