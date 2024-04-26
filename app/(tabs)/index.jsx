@@ -12,7 +12,6 @@ import services from "../../utils/services";
 import { client } from "../../utils/KindeConfig";
 import { supabase } from "../../utils/SupabaseConfig";
 import Header from "../../components/Header";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../utils/Colors";
 import CircleChart from "../../components/CircleChart";
 import { Ionicons } from "@expo/vector-icons";
@@ -79,7 +78,7 @@ export default function Home() {
           <Header />
         </View>
         <View style={{ padding: 20, marginTop: -75 }}>
-          <CircleChart />
+          {categoryList && <CircleChart categoryList={categoryList} />}
           <CategoryList categoryList={categoryList} />
         </View>
       </ScrollView>
