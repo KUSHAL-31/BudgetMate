@@ -14,6 +14,7 @@ import { Foundation } from "@expo/vector-icons";
 import { supabase } from "../utils/SupabaseConfig";
 import { client } from "../utils/KindeConfig";
 import { useRouter } from "expo-router";
+import { ActivityIndicator } from "react-native";
 
 export default function AddNewCategory() {
   const router = useRouter();
@@ -22,9 +23,11 @@ export default function AddNewCategory() {
   const [selectedColor, setSelectedColor] = useState(Colors.PRIMARY);
   const [category, setCategory] = useState("");
   const [totalBudget, setTotalBudget] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Function to add a new category to the database
   const handleAddCategory = async () => {
+    setLoading(true);
     // Get the user details
     const user = await client.getUserDetails();
     // Insert the new category into the database
@@ -40,6 +43,7 @@ export default function AddNewCategory() {
         },
       ])
       .select();
+    setLoading(false);
     if (data) {
       router.replace({
         params: { categoryId: data[0].id },
@@ -98,13 +102,17 @@ export default function AddNewCategory() {
         onPress={handleAddCategory}
         activeOpacity={0.7}
         style={styles.addButton}
-        disabled={category === "" || totalBudget === ""}
+        disabled={category === "" || totalBudget === "" || loading}
       >
-        <Text
-          style={{ textAlign: "center", fontSize: 16, color: Colors.white }}
-        >
-          Create
-        </Text>
+        {loading ? (
+          <ActivityIndicator color={Colors.white} />
+        ) : (
+          <Text
+            style={{ textAlign: "center", fontSize: 16, color: Colors.white }}
+          >
+            Create
+          </Text>
+        )}
       </TouchableOpacity>
     </View>
   );

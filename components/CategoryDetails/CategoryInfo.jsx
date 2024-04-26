@@ -19,7 +19,10 @@ export default function CategoryInfo({ categoryDetails }) {
       total += item.cost;
     });
     setTotalAmount(total);
-    const percentage = (total / categoryDetails.budget) * 100;
+    var percentage = (total / categoryDetails.budget) * 100;
+    if (percentage > 100) {
+      percentage = 100;
+    }
     setPercentage(percentage);
   };
 
