@@ -5,6 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Link, useRouter } from "expo-router";
@@ -19,15 +21,6 @@ import CategoryList from "../../components/CategoryList";
 
 export default function Home() {
   const router = useRouter();
-
-  // This function is used to logout the user
-  const logoutClick = async () => {
-    const loggedOut = await client.logout(true);
-    if (loggedOut) {
-      await services.storeData("login", "false");
-      router.replace("/login");
-    }
-  };
 
   const [categoryList, setCategoryList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -53,6 +46,18 @@ export default function Home() {
     checkAuthenticatedUser();
     getBudgetCategory();
   }, []);
+
+  // This function is used to navigate to the add category page
+  const onAddCategoryClick = () => {
+    // Check to see if user has reached the maximum number of categories allowed (5)
+    if (categoryList.length >= 5) {
+      Alert.alert(
+        "Premium version coming soon to add more than five categories"
+      );
+      return;
+    }
+    router.replace("/add-category");
+  };
 
   // This function is used to check if the user is authenticated
 
@@ -82,9 +87,12 @@ export default function Home() {
           <CategoryList categoryList={categoryList} />
         </View>
       </ScrollView>
-      <Link style={styles.addButton} href={"/add-new-category"}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => onAddCategoryClick()}
+      >
         <Ionicons name="add-circle" size={54} color={Colors.PRIMARY} />
-      </Link>
+      </TouchableOpacity>
     </View>
   );
 }

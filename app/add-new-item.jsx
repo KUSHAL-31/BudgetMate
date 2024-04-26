@@ -53,41 +53,72 @@ export default function AddNewItem() {
     }
   };
 
-  const handleAddItemClick = async () => {
-    var isImageSelected = image !== defaultImage;
-    setLoading(true);
-    var fileUrl = defaultImage;
-    if (isImageSelected) {
-      const fileName = Date.now().toString();
-      // Add the code to add the item to the database here
-      const { data, error } = await supabase.storage
-        .from("images")
-        .upload(`${fileName}.png`, decode(image), {
-          contentType: "image/png",
-        });
-      if (data) {
-        fileUrl = `${process.env.EXPO_PUBLIC_BUCKET_URL}${fileName}.png`;
-      }
-    }
-
-    const { data2, error2 } = await supabase
+  const isBudgetExceeded = async (cost) => {
+    // Check budget of the category
+    const res1 = await supabase
+      .from("BudgetCategory")
+      .select("budget")
+      .eq("id", categoryId);
+    const budget = res1.data[0].budget;
+    // Calculate total cost of all the category items
+    const res2 = await supabase
       .from("BudgetCategoryItems")
-      .insert([
-        {
-          name: itemDetails.name,
-          cost: itemDetails.cost,
-          url: itemDetails.url,
-          note: itemDetails.note,
-          image: fileUrl,
-          budget_category_id: categoryId,
-        },
-      ]);
-    ToastAndroid.show("Item added successfully", ToastAndroid.SHORT);
-    setLoading(false);
-    router.replace({
-      params: { categoryId: categoryId },
-      pathname: "/category-details",
+      .select("cost")
+      .eq("budget_category_id", categoryId);
+    var totalCost = 0;
+    res2.data.forEach((item) => {
+      totalCost += item.cost;
     });
+    // Check if the cost of the new item exceeds the budget
+    if (totalCost + parseInt(cost) > budget) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const handleAddItemClick = async () => {
+    if (!(await isBudgetExceeded(itemDetails?.cost))) {
+      var isImageSelected = image !== defaultImage;
+      setLoading(true);
+      var fileUrl = defaultImage;
+      if (isImageSelected) {
+        const fileName = Date.now().toString();
+        // Add the code to add the item to the database here
+        const { data, error } = await supabase.storage
+          .from("images")
+          .upload(`${fileName}.png`, decode(image), {
+            contentType: "image/png",
+          });
+        if (data) {
+          fileUrl = `${process.env.EXPO_PUBLIC_BUCKET_URL}${fileName}.png`;
+        }
+      }
+
+      const { data2, error2 } = await supabase
+        .from("BudgetCategoryItems")
+        .insert([
+          {
+            name: itemDetails.name,
+            cost: itemDetails.cost,
+            url: itemDetails.url,
+            note: itemDetails.note,
+            image: fileUrl,
+            budget_category_id: categoryId,
+          },
+        ]);
+      ToastAndroid.show("Item added successfully", ToastAndroid.SHORT);
+      setLoading(false);
+      router.replace({
+        params: { categoryId: categoryId },
+        pathname: "/category-details",
+      });
+    } else {
+      ToastAndroid.show(
+        "Budget exceeded. Please add an item within the budget.",
+        ToastAndroid.SHORT
+      );
+    }
   };
 
   return (

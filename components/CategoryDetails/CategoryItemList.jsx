@@ -1,8 +1,52 @@
-import { View, Text, StyleSheet, Image } from "react-native";
-import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ToastAndroid,
+  Linking,
+} from "react-native";
+import React, { useState } from "react";
 import Colors from "../../utils/Colors";
+import { EvilIcons } from "@expo/vector-icons";
+import { supabase } from "../../utils/SupabaseConfig";
+import { openURL } from "expo-linking";
 
-export default function CategoryItemList({ categoryDetails }) {
+export default function CategoryItemList({ categoryDetails, setUpdateRecord }) {
+  const [expandItem, setExpandItem] = useState(-1);
+
+  // Function to delete item from category
+  const onDeleteItem = async (itemId) => {
+    try {
+      const { data, error } = await supabase
+        .from("BudgetCategoryItems")
+        .select("image")
+        .eq("id", itemId);
+      if (data) {
+        if (data[0].image.includes("/public/images/")) {
+          const imagePath = data[0].image.split("/public/images/")[1];
+          await supabase.storage.from("images").remove([imagePath]);
+        }
+      }
+      await supabase.from("BudgetCategoryItems").delete().eq("id", itemId);
+      ToastAndroid.show("Item deleted successfully", ToastAndroid.SHORT);
+    } catch (error) {
+      ToastAndroid.show("Something went wrong", ToastAndroid.SHORT);
+      setUpdateRecord();
+    }
+  };
+
+  // Function to open the URL in the browser
+
+  const openUrl = (url) => {
+    try {
+      Linking.openURL(url);
+    } catch (error) {
+      ToastAndroid.show("Invalid URL", ToastAndroid.SHORT);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Category Items</Text>
@@ -11,14 +55,35 @@ export default function CategoryItemList({ categoryDetails }) {
         {categoryDetails?.BudgetCategoryItems?.length > 0 ? (
           categoryDetails?.BudgetCategoryItems?.map((item, index) => (
             <>
-              <View key={index} style={styles.itemContainer}>
+              <TouchableOpacity
+                activeOpacity={0.9}
+                key={index}
+                style={styles.itemContainer}
+                onPress={() => setExpandItem(index)}
+              >
                 <Image source={{ uri: item?.image }} style={styles.itemImage} />
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={styles.itemName}>{item?.name}</Text>
                   <Text style={styles.itemUrl}>{item?.url}</Text>
                 </View>
                 <Text style={styles.itemCost}>Rs {item?.cost}</Text>
-              </View>
+              </TouchableOpacity>
+              {expandItem === index && (
+                <View style={styles.actionContainer}>
+                  <TouchableOpacity onPress={() => onDeleteItem(item.id)}>
+                    <EvilIcons name="trash" size={27} color={Colors.red} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => item?.url && openUrl(item?.url)}
+                  >
+                    <EvilIcons
+                      name="external-link"
+                      size={27}
+                      color={Colors.blue}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
               {categoryDetails?.BudgetCategoryItems.length - 1 !== index && (
                 <View
                   key={index}
@@ -81,5 +146,11 @@ const styles = StyleSheet.create({
     fontFamily: "outfit-bold",
     marginLeft: 10,
     fontSize: 18,
+  },
+  actionContainer: {
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "flex-end",
+    marginBottom: 15,
   },
 });
